@@ -35,4 +35,27 @@ public class BackgroundUtils {
         return backgroundGameObject;
 
     }
+
+    public static GameObject addBackgroundObject(GameObjectCollection gameObjects,
+                                                    Vector2 size,
+                                                    Vector2 location,
+                                                    Renderable renderable,
+                                                    int layer) {
+        GameObject gameObject = new GameObject(Vector2.ZERO, size,renderable);
+        gameObject.setCoordinateSpace(CoordinateSpace.CAMERA_COORDINATES);
+        gameObject.setCenter(location);
+        gameObjects.addGameObject(gameObject,layer);
+        return gameObject;
+    }
+
+    public static GameObject addBackgroundObject(GameObjectCollection gameObjects,
+                                                 Vector2 size,
+                                                 Vector2 location,
+                                                 Renderable renderable,
+                                                 int layer,
+                                                 String tag) {
+        GameObject gameObject = addBackgroundObject(gameObjects, size, location, renderable, layer);
+        gameObject.setTag(tag);
+        return gameObject;
+    }
 }
