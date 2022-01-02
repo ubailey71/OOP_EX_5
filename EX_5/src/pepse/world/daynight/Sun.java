@@ -43,10 +43,10 @@ public class Sun {
     }
 
     private static Vector2 calcSunCenter (Float angle,Vector2 windowCenter){
+        float radianAngle = angle * ((float) Math.PI / 180) - 90;
         float radius = windowCenter.x() / 2;
-        float x = windowCenter.x() + (radius * (float)Math.cos(angle));
-        float y = windowCenter.y() + (radius * (float)Math.sin(angle));
-        System.out.println("x = " + x + " , y = " + y);
+        float x = windowCenter.x() + (radius * 1.5f * (float)Math.cos(radianAngle));
+        float y = windowCenter.y() + (radius * (float)Math.sin(radianAngle));
         return new Vector2(x,y);
     }
 

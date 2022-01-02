@@ -14,7 +14,7 @@ import pepse.world.daynight.Sun;
 
 public class PepseGameManager extends GameManager {
 
-    private static float CYCLE_LENGTH = 100;
+    private static float CYCLE_LENGTH = 10;
 
     //TODO: remove constructor when done.
     public PepseGameManager(String title, Vector2 windowDimensions){
