@@ -8,6 +8,7 @@ import danogl.gui.SoundReader;
 import danogl.gui.UserInputListener;
 import danogl.gui.WindowController;
 import danogl.util.Vector2;
+import pepse.world.Avatar;
 import pepse.world.Sky;
 import pepse.world.Terrain;
 import pepse.world.daynight.Night;
@@ -18,7 +19,7 @@ import java.awt.*;
 
 public class PepseGameManager extends GameManager {
 
-    private static final float CYCLE_LENGTH = 10;
+    private static final float CYCLE_LENGTH = 60;
     private static final Color haloColor = new Color(255, 255, 0, 20);
 
     //TODO: remove constructor when done.
@@ -59,6 +60,11 @@ public class PepseGameManager extends GameManager {
         Vector2 windowDimensions = windowController.getWindowDimensions();
         Terrain terrain = new Terrain(gameObjects(), Layer.STATIC_OBJECTS, windowDimensions, seed);
         terrain.createInRange(0, (int) windowDimensions.x());
+
+        //avatar creation
+        Vector2 avatarLocation = windowDimensions.mult(0.2f);
+        Avatar avatar = Avatar.create(gameObjects(), Layer.DEFAULT,avatarLocation, inputListener,
+                imageReader);
     }
 
     public static void main(String[] args) {
