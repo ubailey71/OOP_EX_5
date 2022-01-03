@@ -44,8 +44,7 @@ public class Avatar extends GameObject {
     }
 
     private static String[] framePaths(int start, int end) {
-        String basePath = "C:\\Users\\Uri Bailey\\IdeaProjects\\OOP_EX_5\\EX_5\\src\\pepse\\knight-frames" +
-                "\\knight-frame";
+        String basePath = "EX_5/src/pepse/knight-frames\\knight-frame";
         String suffix = ".png";
         String[] frames = new String[(1 + end) - start];
         for (int frameNum = start; frameNum <= end; frameNum++) {
