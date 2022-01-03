@@ -29,6 +29,7 @@ public class Night {
                 BASIC_NIGHT_COLOR,
                 NIGHT_TAG);
 
+        //TODO: change 0 f to CONSTANT and also the dividing by 2!
         Transition<Float> opaquenessChanger = new Transition<>(
                 night,
                 night.renderer()::setOpaqueness,
