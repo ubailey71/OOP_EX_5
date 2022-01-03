@@ -7,6 +7,7 @@ import danogl.components.Transition;
 import danogl.gui.rendering.OvalRenderable;
 import danogl.gui.rendering.Renderable;
 import danogl.util.Vector2;
+import pepse.util.BackgroundUtils;
 
 import java.awt.*;
 
@@ -21,10 +22,15 @@ public class Sun {
             float cycleLength){
 
         Renderable sunRenderable = new OvalRenderable(SUN_COLOR);
-        GameObject sunGameObject = new GameObject(Vector2.ZERO, SUN_DIMENSIONS,sunRenderable);
-        sunGameObject.setTag(SUN_TAG);
 
-        sunGameObject.setCoordinateSpace(CoordinateSpace.CAMERA_COORDINATES);
+        GameObject sunGameObject = BackgroundUtils.addBackgroundObject(
+                gameObjects,
+                SUN_DIMENSIONS,
+                Vector2.ZERO,
+                sunRenderable,
+                layer,
+                SUN_TAG);
+
         Vector2 windowCenter = new Vector2(windowDimensions.x()/2, windowDimensions.y()/2);
 
         Transition<Float> locationChanger = new Transition<>(
@@ -38,7 +44,6 @@ public class Sun {
                 null
         );
 
-        gameObjects.addGameObject(sunGameObject,layer);
         return sunGameObject;
     }
 

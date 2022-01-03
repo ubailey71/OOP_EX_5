@@ -1,6 +1,7 @@
 package pepse;
 
 import danogl.GameManager;
+import danogl.GameObject;
 import danogl.collisions.Layer;
 import danogl.gui.ImageReader;
 import danogl.gui.SoundReader;
@@ -11,10 +12,14 @@ import pepse.world.Sky;
 import pepse.world.Terrain;
 import pepse.world.daynight.Night;
 import pepse.world.daynight.Sun;
+import pepse.world.daynight.SunHalo;
+
+import java.awt.*;
 
 public class PepseGameManager extends GameManager {
 
-    private static float CYCLE_LENGTH = 10;
+    private static final float CYCLE_LENGTH = 10;
+    private static final Color haloColor = new Color(255, 255, 0, 20);
 
     //TODO: remove constructor when done.
     public PepseGameManager(String title, Vector2 windowDimensions){
@@ -25,10 +30,28 @@ public class PepseGameManager extends GameManager {
                                          UserInputListener inputListener, WindowController windowController) {
         super.initializeGame(imageReader, soundReader, inputListener, windowController);
 
+        Sky.create(
+                this.gameObjects(),
+                windowController.getWindowDimensions(),
+                Layer.BACKGROUND);
 
-        Sky.create(this.gameObjects(),windowController.getWindowDimensions(), Layer.BACKGROUND);
-        Night.create(this.gameObjects(),Layer.BACKGROUND,windowController.getWindowDimensions(),CYCLE_LENGTH);
-        Sun.create(this.gameObjects(),Layer.BACKGROUND+1,windowController.getWindowDimensions(),CYCLE_LENGTH);
+        Night.create(
+                this.gameObjects(),
+                Layer.FOREGROUND,
+                windowController.getWindowDimensions(),
+                CYCLE_LENGTH);
+
+        GameObject sun = Sun.create(
+                this.gameObjects(),
+                Layer.BACKGROUND + 1,
+                windowController.getWindowDimensions(),
+                CYCLE_LENGTH);
+
+        SunHalo.create(
+                this.gameObjects(),
+                Layer.BACKGROUND + 10,
+                sun,
+                haloColor);
 
         //TODO: make seed permanent.
         //terrain part
