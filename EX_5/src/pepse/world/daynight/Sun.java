@@ -15,6 +15,7 @@ public class Sun {
     private static final Color SUN_COLOR = Color.YELLOW;
     private static final String SUN_TAG = "sun";
     private static final Vector2 SUN_DIMENSIONS = new Vector2(100,100);
+
     public static GameObject create(
             GameObjectCollection gameObjects,
             int layer,
@@ -32,6 +33,9 @@ public class Sun {
                 SUN_TAG);
 
         Vector2 windowCenter = new Vector2(windowDimensions.x()/2, windowDimensions.y()/2);
+
+        //TODO: make floats constants, the float declaration in the callback is not needed.
+        //TODO: check if the path of the sun in a regular circle or an oval.
 
         Transition<Float> locationChanger = new Transition<>(
                 sunGameObject,
