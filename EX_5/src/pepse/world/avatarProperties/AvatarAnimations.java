@@ -1,4 +1,4 @@
-package pepse.world;
+package pepse.world.avatarProperties;
 
 import danogl.gui.rendering.Renderable;
 

@@ -7,6 +7,9 @@ import danogl.gui.UserInputListener;
 import danogl.gui.rendering.AnimationRenderable;
 import danogl.gui.rendering.Renderable;
 import danogl.util.Vector2;
+import pepse.world.avatarProperties.AvatarAnimations;
+import pepse.world.avatarProperties.AvatarKeymap;
+
 import java.awt.event.KeyEvent;
 
 public class Avatar extends GameObject {
@@ -24,6 +27,7 @@ public class Avatar extends GameObject {
     private boolean isLookingLeft = false;
     private AvatarAnimations animations;
     private UserInputListener inputListener;
+    private AvatarKeymap keymap;
 
     /**
      * Construct a new GameObject instance.
@@ -35,17 +39,17 @@ public class Avatar extends GameObject {
     public Avatar(Vector2 topLeftCorner,
                   Vector2 dimensions,
                   UserInputListener inputListener,
-                  AvatarAnimations animations
+                  AvatarAnimations animations,
+                  AvatarKeymap keymap
     ) {
         super(topLeftCorner, dimensions, animations.stand);
         this.inputListener = inputListener;
         this.animations = animations;
         this.energyLevel = INITIAL_ENERGY_LEVEL;
+        this.keymap = keymap;
     }
 
-    private static String[] framePaths(int start, int end) {
-        String basePath = "EX_5/src/pepse/knight-frames\\knight-frame";
-        String suffix = ".png";
+    private static String[] framePaths(String basePath, String suffix, int start, int end) {
         String[] frames = new String[(1 + end) - start];
         for (int frameNum = start; frameNum <= end; frameNum++) {
             frames[frameNum - start] = basePath + frameNum + suffix;
@@ -53,45 +57,67 @@ public class Avatar extends GameObject {
         return frames;
     }
 
+    private static AnimationRenderable getAnimation (String basePath, String suffix, int start, int end,
+                                                     ImageReader imageReader){
+        return new AnimationRenderable(
+                framePaths(basePath,suffix,start,end),
+                imageReader,
+                true,
+                WAIT_TIME);
+    }
+
     public static Avatar create(GameObjectCollection gameObjects,
                                 int layer,
                                 Vector2 topLeftCorner,
                                 UserInputListener inputListener,
                                 ImageReader imageReader) {
-        Renderable standAnimation = new AnimationRenderable(
-                framePaths(1, 33),
-                imageReader,
-                true,
-                WAIT_TIME);
-        Renderable walkAnimation = new AnimationRenderable(
-                framePaths(34, 41),
-                imageReader,
-                true,
-                WAIT_TIME);
-        Renderable acceleration_up = new AnimationRenderable(
-                framePaths(42, 86),
-                imageReader,
-                true,
-                WAIT_TIME);
-        Renderable fly = new AnimationRenderable(
-                framePaths(87, 163),
-                imageReader,
-                true,
-                WAIT_TIME);
-        Renderable acceleration_down = new AnimationRenderable(
-                framePaths(164, 184),
-                imageReader,
-                true,
-                WAIT_TIME);
+        String basePath = "EX_5/src/pepse/knight-frames\\knight-frame";
+        String suffix = ".png";
+
+        Renderable standAnimation = getAnimation(basePath, suffix, 1, 33, imageReader);
+        Renderable walkAnimation = getAnimation(basePath, suffix,34, 41, imageReader);
+        Renderable acceleration_up = getAnimation(basePath, suffix,42, 86, imageReader);
+        Renderable fly = getAnimation(basePath, suffix,87, 163, imageReader);
+        Renderable acceleration_down = getAnimation(basePath, suffix,164, 184, imageReader);
+
         AvatarAnimations animations =
                 new AvatarAnimations(standAnimation, walkAnimation, acceleration_up,fly, acceleration_down);
 
-        Avatar avatar = new Avatar(topLeftCorner, AVATAR_SCALE, inputListener, animations);
+        AvatarKeymap keymap = new AvatarKeymap(KeyEvent.VK_RIGHT, KeyEvent.VK_LEFT,KeyEvent.VK_SPACE,
+                KeyEvent.VK_SHIFT);
+
+        Avatar avatar = new Avatar(topLeftCorner, AVATAR_SCALE, inputListener, animations, keymap);
         avatar.transform().setAccelerationY(GRAVITY_SPEED);
         avatar.physics().preventIntersectionsFromDirection(Vector2.ZERO);
         gameObjects.addGameObject(avatar, layer);
         return avatar;
     }
+
+    public static Avatar create(GameObjectCollection gameObjects,
+                                int layer,
+                                Vector2 topLeftCorner,
+                                UserInputListener inputListener,
+                                ImageReader imageReader,
+                                String basePath,
+                                String suffix,
+                                AvatarKeymap keymap)
+    {
+        Renderable standAnimation = getAnimation(basePath, suffix, 1, 33, imageReader);
+        Renderable walkAnimation = getAnimation(basePath, suffix,34, 41, imageReader);
+        Renderable acceleration_up = getAnimation(basePath, suffix,42, 86, imageReader);
+        Renderable fly = getAnimation(basePath, suffix,87, 163, imageReader);
+        Renderable acceleration_down = getAnimation(basePath, suffix,164, 184, imageReader);
+
+        AvatarAnimations animations =
+                new AvatarAnimations(standAnimation, walkAnimation, acceleration_up,fly, acceleration_down);
+
+        Avatar avatar = new Avatar(topLeftCorner, AVATAR_SCALE, inputListener, animations, keymap);
+        avatar.transform().setAccelerationY(GRAVITY_SPEED);
+        avatar.physics().preventIntersectionsFromDirection(Vector2.ZERO);
+        gameObjects.addGameObject(avatar, layer);
+        return avatar;
+    }
+
 
     private void handleStanding(boolean isOnGround){
         if (!inputListener.isKeyPressed(KeyEvent.KEY_PRESSED)) {
@@ -101,14 +127,14 @@ public class Avatar extends GameObject {
         }
     }
     private void handleHorizontalMovement(boolean isOnGround){
-        if (inputListener.isKeyPressed(KeyEvent.VK_RIGHT)) {
+        if (inputListener.isKeyPressed(keymap.moveRight)) {
             if (isOnGround)
                 this.renderer().setRenderable(this.animations.walk);
             this.transform().setVelocityX(WALK_SPEED);
             isLookingLeft = false;
         }
 
-        if (inputListener.isKeyPressed(KeyEvent.VK_LEFT)) {
+        if (inputListener.isKeyPressed(keymap.moveLeft)) {
             if (isOnGround)
                 this.renderer().setRenderable(this.animations.walk);
             this.transform().setVelocityX(-WALK_SPEED);
@@ -117,14 +143,14 @@ public class Avatar extends GameObject {
     }
     private void handleVerticalMovement(boolean isOnGround){
         boolean isFlying = false;
-        if (inputListener.isKeyPressed(KeyEvent.VK_SPACE)) {
+        if (inputListener.isKeyPressed(keymap.jump)) {
             if (isOnGround) {
                 this.transform().setVelocityY(VERTICAL_JUMP_SPEED);
                 return;
             }
         }
 
-        if (inputListener.isKeyPressed(KeyEvent.VK_SPACE) && inputListener.isKeyPressed(KeyEvent.VK_SHIFT)){
+        if (inputListener.isKeyPressed(keymap.jump) && inputListener.isKeyPressed(keymap.fly)){
             isFlying = energyLevel > 0;
         }
 
