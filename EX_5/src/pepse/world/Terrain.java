@@ -6,6 +6,7 @@ import danogl.gui.rendering.Renderable;
 import danogl.util.Vector2;
 import pepse.util.ColorSupplier;
 import pepse.util.PerlinNoise;
+import pepse.util.ScreenChunkManager;
 
 import java.awt.*;
 
@@ -16,10 +17,12 @@ import java.awt.*;
 public class Terrain {
     private static final Color BASE_GROUND_COLOR = new Color(212, 123, 74);
     private static final String GROUND_TAG = "ground";
+    private static final float GROUND_PERCENTAGE = 2 / 3f;
+    private static final int TOP_LAYERS_AMOUNT = 2;
     private static final int TERRAIN_DEPTH = 20;
 
     private final GameObjectCollection gameObjects;
-    private final PerlinNoise simplexNoise;
+    private final PerlinNoise perlinNoise;
     private final Vector2 windowDimensions;
     private final float groundHeightAtX0;
     private final int groundLayer;
@@ -36,10 +39,10 @@ public class Terrain {
     public Terrain(GameObjectCollection gameObjects, int groundLayer, Vector2 windowDimensions, int seed) {
         this.gameObjects = gameObjects;
         this.groundLayer = groundLayer;
-        this.groundHeightAtX0 = windowDimensions.y() * ((float) 2 / 3);
+        this.groundHeightAtX0 = windowDimensions.y() * GROUND_PERCENTAGE;
         this.windowDimensions = windowDimensions;
 
-        this.simplexNoise = new PerlinNoise(seed);
+        this.perlinNoise = new PerlinNoise(seed);
     }
 
     /**
@@ -49,8 +52,8 @@ public class Terrain {
      * @return The ground height at the given location.
      */
     public float groundHeightAt(float x) {
-        float groundHeight =  (float) simplexNoise.noise( x/Block.SIZE) ;
-        return groundHeight * windowDimensions.y() + groundHeightAtX0;
+        float groundHeight =  (float) perlinNoise.noise( x/Block.SIZE) ;
+        return groundHeight * windowDimensions.y() % 60 + groundHeightAtX0;
     }
 
     /**
@@ -63,6 +66,7 @@ public class Terrain {
     public void createInRange(int minX, int maxX) {
         float blockSize = Block.SIZE;
 
+        // X position of the first and last blocks
         float firstX = (float) (Math.ceil(Math.abs(minX) / blockSize) * (int) Math.signum(minX) * blockSize);
         float lastX = (float) (Math.ceil(Math.abs(maxX) / blockSize) * (int) Math.signum(maxX) * blockSize);
 
@@ -70,20 +74,33 @@ public class Terrain {
         while (curXPosition <= lastX - blockSize) {
             float groundHeight = (float) Math.floor(groundHeightAt(curXPosition) / blockSize) * blockSize;
             for (int blockIdx = 0; blockIdx < TERRAIN_DEPTH; blockIdx++) {
-                if (groundHeight + blockIdx * blockSize > windowDimensions.y()){
-                    break;
-                }
-                Vector2 topLeftCorner = new Vector2(curXPosition, groundHeight + blockIdx * blockSize);
-                Renderable groundRender =
-                        new RectangleRenderable(ColorSupplier.approximateColor(BASE_GROUND_COLOR));
-                Block block = new Block(topLeftCorner, groundRender);
-                block.setTag(GROUND_TAG);
-                if (blockIdx < 2){
-                    gameObjects.addGameObject(block, groundLayer);
-                }
-                gameObjects.addGameObject(block, groundLayer + 1);
+                float curYPosition = groundHeight + blockIdx * blockSize;
+                Vector2 blockPosition = new Vector2(curXPosition, curYPosition);
+                createSingleBlock(gameObjects, blockPosition, blockIdx, groundLayer);
             }
             curXPosition += blockSize;
+        }
+    }
+    /*
+    creates a single block of terrain.
+    */
+    private static void createSingleBlock(GameObjectCollection gameObj, Vector2 topLeftCorner,
+                                          int blockRowNum, int layer) {
+
+        Renderable groundRender = new RectangleRenderable(ColorSupplier.approximateColor(BASE_GROUND_COLOR));
+        Block block = new Block(topLeftCorner, groundRender);
+        block.setTag(GROUND_TAG);
+
+        // only TOP_LAYERS_AMOUNT of block rows will be able to collide with objects
+        if (blockRowNum < TOP_LAYERS_AMOUNT) {
+            gameObj.addGameObject(block, layer);
+            ScreenChunkManager.addBlock(block, layer);
+
+        }
+        else {
+            gameObj.addGameObject(block, layer + 1);
+            ScreenChunkManager.addBlock(block, layer + 1);
+
         }
     }
 }
