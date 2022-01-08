@@ -1,39 +1,49 @@
 package pepse.util;
 
+import danogl.GameObject;
 import danogl.collisions.GameObjectCollection;
+import danogl.collisions.Layer;
+import pepse.PepseGameManager;
 import pepse.world.Block;
+import pepse.world.Terrain;
+import pepse.world.trees.Tree;
 
 import java.util.*;
 
+/**
+ * represents a single chunk of ground and holds all the object that are located between its borders.
+ */
 public class ScreenChunk {
-    private final int  minX;
-    private final int  maxX;
-    private final Map<Block, Integer> blocksInChunk = new HashMap<>();
+    private List<GameObject> groundInChunk = new ArrayList<>();
+    private List<GameObject> treesInChunk = new ArrayList<>();
 
-    public ScreenChunk(int minX, int maxX){
-        this.minX = minX;
-        this.maxX = maxX;
+    /**
+     * Constructor
+     *
+     * @param minX left border
+     * @param maxX right border
+     */
+    public ScreenChunk(int minX, int maxX, Terrain terrain, Tree tree) {
+        terrain.createInRange(minX, maxX, groundInChunk);
+        tree.createInRange(minX, maxX, treesInChunk);
     }
+    /**
+     * removes all the game object that are located in this chunk.
+     *
+     * @param gameObjects .
+     */
+    public void removeBlocks(GameObjectCollection gameObjects) {
 
-    public void addBlock(Block block, int layer){
-        blocksInChunk.put(block, layer) ;
-    }
-
-    public void removeBlocks(GameObjectCollection gameObjects){
-        for (Block block: blocksInChunk.keySet()){
-            gameObjects.removeGameObject(block, blocksInChunk.get(block));
-//            System.out.println("removed: " + block.getTag());
+        for (GameObject block : groundInChunk) {
+            if (!gameObjects.removeGameObject(block, Layer.STATIC_OBJECTS + 1))
+                gameObjects.removeGameObject(block, Layer.STATIC_OBJECTS);
         }
+
+        for (GameObject block : treesInChunk) {
+            if (!gameObjects.removeGameObject(block, PepseGameManager.TREES_LAYER))
+                if (!gameObjects.removeGameObject(block, PepseGameManager.TREES_LAYER + 1))
+                    gameObjects.removeGameObject(block, PepseGameManager.TREES_LAYER + 2);
+        }
+
     }
-
-    public int getChunkStart(){
-        return minX;
-    }
-
-    public int getChunkEnd(){
-        return maxX;
-    }
-
-
-
 }

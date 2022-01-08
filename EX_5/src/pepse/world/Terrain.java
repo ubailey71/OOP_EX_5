@@ -1,5 +1,6 @@
 package pepse.world;
 
+import danogl.GameObject;
 import danogl.collisions.GameObjectCollection;
 import danogl.gui.rendering.RectangleRenderable;
 import danogl.gui.rendering.Renderable;
@@ -9,6 +10,7 @@ import pepse.util.PerlinNoise;
 import pepse.util.ScreenChunkManager;
 
 import java.awt.*;
+import java.util.List;
 
 
 /**
@@ -41,6 +43,7 @@ public class Terrain {
         this.groundLayer = groundLayer;
         this.groundHeightAtX0 = windowDimensions.y() * GROUND_PERCENTAGE;
         this.windowDimensions = windowDimensions;
+
         this.perlinNoise = new PerlinNoise(seed);
     }
 
@@ -51,8 +54,8 @@ public class Terrain {
      * @return The ground height at the given location.
      */
     public float groundHeightAt(float x) {
-        float groundHeight = (float) perlinNoise.noise(x / Block.SIZE);
-        return groundHeight * windowDimensions.y() / 2 + groundHeightAtX0;
+        float groundHeight =  (float) perlinNoise.noise( x/Block.SIZE) ;
+        return groundHeight * windowDimensions.y() % 60 + groundHeightAtX0;
     }
 
     /**
@@ -61,6 +64,7 @@ public class Terrain {
      * @param minX - The lower bound of the given range (will be rounded to a multiple of Block.SIZE).
      * @param maxX - The upper bound of the given range (will be rounded to a multiple of Block.SIZE).
      */
+
     public void createInRange(int minX, int maxX) {
         float blockSize = Block.SIZE;
 
@@ -71,9 +75,7 @@ public class Terrain {
         float curXPosition = firstX;
         while (curXPosition <= lastX - blockSize) {
             float groundHeight = (float) Math.floor(groundHeightAt(curXPosition) / blockSize) * blockSize;
-
             for (int blockIdx = 0; blockIdx < TERRAIN_DEPTH; blockIdx++) {
-
                 float curYPosition = groundHeight + blockIdx * blockSize;
                 Vector2 blockPosition = new Vector2(curXPosition, curYPosition);
                 createSingleBlock(gameObjects, blockPosition, blockIdx, groundLayer);
@@ -82,9 +84,28 @@ public class Terrain {
         }
     }
 
+    public void createInRange(int minX, int maxX, List<GameObject> addedBlocks) {
+        float blockSize = Block.SIZE;
+
+        // X position of the first and last blocks
+        float firstX = (float) (Math.ceil(Math.abs(minX) / blockSize) * (int) Math.signum(minX) * blockSize);
+        float lastX = (float) (Math.ceil(Math.abs(maxX) / blockSize) * (int) Math.signum(maxX) * blockSize);
+
+        float curXPosition = firstX;
+        while (curXPosition <= lastX - blockSize) {
+            float groundHeight = (float) Math.floor(groundHeightAt(curXPosition) / blockSize) * blockSize;
+            for (int blockIdx = 0; blockIdx < TERRAIN_DEPTH; blockIdx++) {
+                float curYPosition = groundHeight + blockIdx * blockSize;
+                Vector2 blockPosition = new Vector2(curXPosition, curYPosition);
+                createSingleBlock(gameObjects, blockPosition, blockIdx, groundLayer, addedBlocks);
+            }
+            curXPosition += blockSize;
+        }
+    }
+
     /*
     creates a single block of terrain.
-     */
+    */
     private static void createSingleBlock(GameObjectCollection gameObj, Vector2 topLeftCorner,
                                           int blockRowNum, int layer) {
 
@@ -95,13 +116,25 @@ public class Terrain {
         // only TOP_LAYERS_AMOUNT of block rows will be able to collide with objects
         if (blockRowNum < TOP_LAYERS_AMOUNT) {
             gameObj.addGameObject(block, layer);
-            ScreenChunkManager.addBlock(block, layer);
 
         }
         else {
             gameObj.addGameObject(block, layer + 1);
-            ScreenChunkManager.addBlock(block, layer + 1);
-
         }
     }
+
+    private static void createSingleBlock(GameObjectCollection gameObj, Vector2 topLeftCorner,
+                                          int blockRowNum, int layer, List<GameObject> addedBlocks) {
+
+        Renderable groundRender = new RectangleRenderable(ColorSupplier.approximateColor(BASE_GROUND_COLOR));
+        Block block = new Block(topLeftCorner, groundRender);
+        block.setTag(GROUND_TAG);
+
+        // only TOP_LAYERS_AMOUNT of block rows will be able to collide with objects
+        if (blockRowNum < TOP_LAYERS_AMOUNT) gameObj.addGameObject(block, layer);
+        else gameObj.addGameObject(block, layer + 1);
+
+        addedBlocks.add(block);
+    }
+
 }

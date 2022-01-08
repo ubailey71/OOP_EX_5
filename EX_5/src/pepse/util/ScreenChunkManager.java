@@ -1,74 +1,102 @@
 package pepse.util;
 
 import danogl.collisions.GameObjectCollection;
+import danogl.gui.rendering.Camera;
 import danogl.util.Vector2;
 import pepse.world.Block;
+import pepse.world.Terrain;
+import pepse.world.trees.Tree;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.function.BiConsumer;
 
+
+/**
+ * make sure that there are always chunks of ground surrounding the player.
+ */
 public class ScreenChunkManager {
-    private static int worldMinX;
-    private static int worldMaxX;
-    private static GameObjectCollection gameObjects;
-    private static Vector2 windowDimensions;
-    private static BiConsumer<Integer, Integer> createTerrainInRange;
-    private static BiConsumer<Integer, Integer> createTreeInRange;
-    private static final ArrayList<ScreenChunk> chunkList = new ArrayList<>();
+
+    private final int BLOCK_SIZE;
+    private int worldMinX;
+    private int worldMaxX;
+    private final Tree tree;
+    private final Terrain terrain;
+    private final GameObjectCollection gameObjects;
+    private final Deque<ScreenChunk> chunkList = new ArrayDeque<>();
 
     public ScreenChunkManager(GameObjectCollection gameObjects, Vector2 windowDimensions,
-                              BiConsumer<Integer, Integer> createTerrainInRange,
-                              BiConsumer<Integer, Integer> createTreeInRange1) {
-        ScreenChunkManager.gameObjects = gameObjects;
-        ScreenChunkManager.windowDimensions = windowDimensions;
-        ScreenChunkManager.createTerrainInRange = createTerrainInRange;
-        ScreenChunkManager.createTreeInRange = createTreeInRange1;
-        ScreenChunkManager.worldMinX = 0;
-        ScreenChunkManager.worldMaxX = (int) windowDimensions.x();
-        ScreenChunk firstChunk = new ScreenChunk(worldMinX, worldMaxX);
-        chunkList.add(firstChunk);
+                              Tree tree, Terrain terrain, float avatarX) {
+        this.gameObjects = gameObjects;
+        this.BLOCK_SIZE = (int) (windowDimensions.x() / 2);
+        this.worldMinX = (int) (avatarX - BLOCK_SIZE / 2);
+        this.worldMaxX = worldMinX + BLOCK_SIZE;
+        this.tree = tree;
+        this.terrain = terrain;
+        addInitialChunks();
     }
 
-    public static void updateChunks(float avatarXPosition) {
-        if (avatarXPosition - 2 * windowDimensions.x() > worldMinX){
-            chunkList.get(0).removeBlocks(gameObjects);
-            chunkList.remove(0);
-            worldMinX += windowDimensions.x();
-            System.out.println("min: " + worldMinX + ", max: " + worldMaxX + ", numOfBlocks: " + chunkList.size());
-        }
-
-        if (avatarXPosition + 2 * windowDimensions.x() < worldMaxX){
-            chunkList.get(chunkList.size() - 1).removeBlocks(gameObjects);
-            chunkList.remove(chunkList.size() - 1);
-            worldMaxX -= windowDimensions.x();
-            System.out.println("min: " + worldMinX + ", max: " + worldMaxX + ", numOfBlocks: " + chunkList.size());
-        }
-        if (avatarXPosition - windowDimensions.x() < worldMinX) {
-            int newMinX = (int) (worldMinX - windowDimensions.x());
-            chunkList.add(0, new ScreenChunk(newMinX, worldMinX));
-            createTerrainInRange.accept(newMinX, worldMinX);
-            createTreeInRange.accept(newMinX, worldMinX);
-            worldMinX -= windowDimensions.x();
-            System.out.println("min: " + worldMinX + ", max: " + worldMaxX + ", numOfBlocks: " + chunkList.size());
-
-        }
-        if (avatarXPosition + windowDimensions.x() > worldMaxX) {
-            int newMaxX = (int) (worldMaxX + windowDimensions.x());
-            chunkList.add(chunkList.size(), new ScreenChunk(worldMaxX, newMaxX));
-            createTerrainInRange.accept(worldMaxX, newMaxX);
-            createTreeInRange.accept(worldMaxX, newMaxX);
-            worldMaxX += windowDimensions.x();
-            System.out.println("min: " + worldMinX + ", max: " + worldMaxX + ", numOfBlocks: " + chunkList.size());
-        }
+    private void addInitialChunks() {
+        chunkList.addFirst(new ScreenChunk(worldMinX, worldMinX + BLOCK_SIZE,
+                this.terrain, this.tree));
+        addChunkLeft();
+        addChunkRight();
     }
 
-    public static void addBlock(Block block, int layer) {
-        int blockPos = (int) block.getTopLeftCorner().x();
-        for (int chunkIdx = 0; chunkIdx < chunkList.size(); chunkIdx++) {
-            ScreenChunk chunk = chunkList.get(chunkIdx);
-            if (chunk.getChunkStart() <= blockPos && blockPos <= chunk.getChunkEnd()) {
-                chunk.addBlock(block, layer);
-            }
+    private void addChunkRight() {
+        chunkList.addLast(new ScreenChunk(worldMaxX, (int) Math.ceil(worldMaxX + BLOCK_SIZE),
+                this.terrain, this.tree));
+        worldMaxX = (int) Math.ceil(worldMaxX + BLOCK_SIZE);
+    }
+
+    private void removeChunkRight() {
+        chunkList.removeLast().removeBlocks(gameObjects);
+        worldMaxX = (int) Math.ceil(worldMaxX - BLOCK_SIZE);
+    }
+
+    private void addChunkLeft() {
+        chunkList.addFirst(new ScreenChunk((int) Math.floor(worldMinX - BLOCK_SIZE), worldMinX,
+                terrain, tree));
+        worldMinX = (int) Math.floor(worldMinX - BLOCK_SIZE);
+    }
+
+    private void removeChunkLeft() {
+        chunkList.removeFirst().removeBlocks(gameObjects);
+        worldMinX = (int) Math.floor(worldMinX + BLOCK_SIZE);
+    }
+
+    private void moveChunksRight() {
+        removeChunkLeft();
+        addChunkRight();
+    }
+
+    private void moveChunksLeft() {
+        removeChunkRight();
+        addChunkLeft();
+    }
+
+    /**
+     * given the avatar current position, it removes unnecessary chunks and adds the new chunks.
+     *
+     * @param playerAXPosition the avatar x position.
+     */
+    public void updateChunks(float playerAXPosition, float playerBXPosition) {
+
+        if (Math.min(playerAXPosition, playerBXPosition) - BLOCK_SIZE < worldMinX) {
+            addChunkLeft();
+        }
+
+        if (Math.min(playerAXPosition, playerBXPosition)  > worldMinX + (BLOCK_SIZE*2)) {
+            removeChunkLeft();
+        }
+
+        if (Math.max(playerAXPosition, playerBXPosition) + BLOCK_SIZE > worldMaxX) {
+            addChunkRight();
+        }
+
+        if (Math.max(playerAXPosition, playerBXPosition)  < worldMaxX - (BLOCK_SIZE*2)) {
+            removeChunkRight();
         }
     }
 }

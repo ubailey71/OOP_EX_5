@@ -7,11 +7,15 @@ import danogl.components.ScheduledTask;
 import danogl.components.Transition;
 import danogl.gui.rendering.Renderable;
 import danogl.util.Vector2;
-import pepse.util.ScreenChunkManager;
 import pepse.world.Block;
+import pepse.util.ScreenChunkManager;
 
+import java.util.List;
 import java.util.Random;
 
+/**
+ * represent a single leaf.
+ */
 public class Leaf extends Block {
     private static final float LEAF_WIDTH_NARROW_FACTOR = 0.9f;
     private static final float LEAF_WIDTH_WIDEN_FACTOR = 1.2f;
@@ -57,6 +61,7 @@ public class Leaf extends Block {
         this.random = random;
         originalLocation = topLeftCorner;
         physics().setMass(LEAF_MASS);
+
     }
 
 
@@ -70,8 +75,28 @@ public class Leaf extends Block {
     public void createLeaf(GameObjectCollection gameObjects, String tag, int layer) {
         this.setTag(tag);
         gameObjects.addGameObject(this, layer);
-        ScreenChunkManager.addBlock(this, layer);
 
+        createRegularLeafMovement(this);
+        horizontalTransition = createHorizontalTransition(this);
+        this.removeComponent(horizontalTransition);
+
+        new ScheduledTask(
+                this,
+                random.nextInt(LIFE_CYCLE_LENGTH_BOUND) +
+                        (deathTime = random.nextInt(DEATH_LENGTH_BOUND)) + FADEOUT_TIME + 5,
+                true,
+                () -> {
+                    this.transform().setVelocityY(FALLING_SPEED);
+                    this.addComponent(horizontalTransition);
+                    this.renderer().fadeOut(FADEOUT_TIME, this::reviveLeaf);
+                });
+    }
+    public void createLeaf(GameObjectCollection gameObjects, String tag, int layer,
+                           List<GameObject> addedLeaves) {
+        this.setTag(tag);
+        gameObjects.addGameObject(this, layer);
+        addedLeaves.add(this);
+//        ScreenChunkManager.addBlock(this, layer);
 
         createRegularLeafMovement(this);
         horizontalTransition = createHorizontalTransition(this);
@@ -89,10 +114,9 @@ public class Leaf extends Block {
                 });
     }
 
-
     /*
     creates the leaf changing angle and width transitions with a random delay.
-     */
+    */
     private void createRegularLeafMovement(Leaf leaf) {
         float delayTime = (random.nextInt(LEAF_DELAY_BOUND)) / LEAF_DELAY_DIVIDE_FACTOR;
         new ScheduledTask(
@@ -107,7 +131,7 @@ public class Leaf extends Block {
 
     /*
     creates the leaf changing angle transition.
-     */
+    */
     private static Transition<Float> createAngleTransition(Leaf leaf) {
         return new Transition<>(
                 leaf,
@@ -172,21 +196,19 @@ public class Leaf extends Block {
         );
     }
 
+
     /**
-     * stops leaf movement when a collision occurs.
+     * stops transitions on collision.
      *
-     * @param other     other object
-     * @param collision -
+     * @param other     .
+     * @param collision .
      */
     @Override
-    public void onCollisionEnter(GameObject other, Collision collision) {
-        super.onCollisionEnter(other, collision);
+    public void onCollisionStay(GameObject other, Collision collision) {
+        super.onCollisionStay(other, collision);
         this.removeComponent(horizontalTransition);
         this.removeComponent(angleTransition);
         this.removeComponent(widthChangeTransition);
         this.transform().setVelocity(Vector2.ZERO);
-
-
-
     }
 }
