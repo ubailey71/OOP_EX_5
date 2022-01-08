@@ -179,5 +179,7 @@ public class Avatar extends GameObject {
         handleHorizontalMovement(isOnGround);
         handleVerticalMovement(isOnGround);
         this.renderer().setIsFlippedHorizontally(isLookingLeft);
+
+
     }
 }
