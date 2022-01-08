@@ -1,5 +1,6 @@
 package pepse.world.avatarProperties;
 
+
 public class AvatarKeymap {
 
     public int moveRight;
@@ -8,7 +9,7 @@ public class AvatarKeymap {
     public int fly;
 
 
-    public AvatarKeymap (int moveRight, int moveLeft, int jump, int fly){
+    public AvatarKeymap(int moveRight, int moveLeft, int jump, int fly) {
         this.moveRight = moveRight;
         this.moveLeft = moveLeft;
         this.jump = jump;

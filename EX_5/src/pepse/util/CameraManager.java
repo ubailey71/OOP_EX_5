@@ -25,7 +25,7 @@ public class CameraManager extends GameObject {
                          UserInputListener inputListener,
                          int changeTrackModeKey) {
         super(Vector2.ZERO, Vector2.ZERO, null);
-        this.originalCamDimensions = cam.getDimensions().mult(0.5f).getImmutableCopy();
+        this.originalCamDimensions = cam.getDimensions().getImmutableCopy();
         this.cam = cam;
         this.playerA = playerA;
         this.playerB = playerB;
@@ -34,9 +34,7 @@ public class CameraManager extends GameObject {
     }
 
     private Vector2 getCamCenter() {
-
         return playerA.transform().getCenter().add(playerB.transform().getCenter()).mult(0.5f);
-
     }
 
     private float getDistance(float a, float b){
@@ -53,7 +51,6 @@ public class CameraManager extends GameObject {
                 playerA.transform().getCenter().y(),
                 playerB.transform().getCenter().y()
         );
-
         float size = Math.max(xDistance,yDistance) + EXTRA_SPACE;
         return new Vector2(size,size);
     }

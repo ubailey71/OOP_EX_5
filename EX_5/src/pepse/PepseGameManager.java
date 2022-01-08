@@ -18,31 +18,37 @@ import pepse.world.avatarProperties.AvatarKeymap;
 import pepse.world.daynight.Night;
 import pepse.world.daynight.Sun;
 import pepse.world.daynight.SunHalo;
+import pepse.world.trees.Tree;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
 
-import pepse.world.trees.Tree;
-
+/**
+ * the pepse game manager.
+ */
 public class PepseGameManager extends GameManager {
 
 
     private static final Color HALO_COLOR = new Color(255, 255, 0, 20);
-    private static final float AVATAR_POSITION_FACTOR = 0.2f;
+    private static final String PLAYER_1_PATH = "EX_5/src/pepse/assets/player1-frames\\knight-frame";
+    private static final String PLAYER_2_PATH = "EX_5/src/pepse/assets/player2-frames\\player2-frame";
+    private static final float PLAYER_2_LOCATION = 0.4f;
+    private static final String PLAYERS_SUFFIX = ".png";
     private static final float CYCLE_LENGTH = 60;
     private static final int SEED = 3;
 
     //Layers
-    private static final int SKY_LAYER = Layer.BACKGROUND;
-    private static final int SUN_LAYER = Layer.BACKGROUND + 1;
-    private static final int TREES_LAYER = Layer.BACKGROUND + 2;
-    private static final int SUN_HALO_LAYER = Layer.BACKGROUND + 10;
-    private static final int TERRAIN_SURFACE_LAYER = Layer.STATIC_OBJECTS;
-    private static final int AVATAR_LAYER = Layer.DEFAULT;
-    private static final int NIGHT_LAYER = Layer.FOREGROUND;
+    public static final int SKY_LAYER = Layer.BACKGROUND;
+    public static final int SUN_LAYER = Layer.BACKGROUND + 1;
+    public static final int TREES_LAYER = Layer.BACKGROUND + 2;
+    public static final int SUN_HALO_LAYER = Layer.BACKGROUND + 10;
+    public static final int TERRAIN_SURFACE_LAYER = Layer.STATIC_OBJECTS;
+    public static final int AVATAR_LAYER = Layer.DEFAULT;
+    public static final int NIGHT_LAYER = Layer.FOREGROUND;
 
     private Avatar player1;
     private Avatar player2;
+    private ScreenChunkManager screenChunkManager;
 
     /**
      * The method will be called once when a GameGUIComponent is created, and again after every
@@ -70,63 +76,56 @@ public class PepseGameManager extends GameManager {
 
         // Initializing Terrain and Trees
         Terrain terrain = new Terrain(gameObjects(), TERRAIN_SURFACE_LAYER, windowDimensions, SEED);
-        terrain.createInRange(0, (int) windowDimensions.x());
-
         Tree tree = new Tree(gameObjects(), terrain::groundHeightAt, TREES_LAYER, SEED);
-        tree.createInRange(0, (int) windowDimensions.x());
-
         gameObjects().layers().shouldLayersCollide(Layer.STATIC_OBJECTS, Layer.DEFAULT, true);
-
-        ScreenChunkManager.create(gameObjects(), windowDimensions, terrain::createInRange,
-                tree::createInRange);
-
-
 
 
         //avatar creation
         //player1 creation
-        Vector2 avatarLocation = windowDimensions.mult(AVATAR_POSITION_FACTOR);
-        String player1BasePath = "EX_5/src/pepse/assets/player1-frames\\knight-frame";
-        String player1suffix = ".png";
+        Vector2 avatarLocation = new Vector2(windowDimensions.x() / 2,
+                terrain.groundHeightAt(windowDimensions.x()) / 2);
         AvatarKeymap player1Keymap = new AvatarKeymap(KeyEvent.VK_RIGHT, KeyEvent.VK_LEFT,
                 KeyEvent.VK_SPACE, KeyEvent.VK_SHIFT);
-        player1 = Avatar.create(gameObjects(), AVATAR_LAYER, avatarLocation, inputListener,
-                imageReader, player1BasePath, player1suffix, player1Keymap);
-
+        player1 = Avatar.createAvatar(gameObjects(), AVATAR_LAYER, avatarLocation, inputListener,
+                imageReader, PLAYER_1_PATH, PLAYERS_SUFFIX, player1Keymap);
         setCamera(new Camera(player1, Vector2.ZERO, windowDimensions, windowDimensions));
-//
-////        player2 creation
-//        Vector2 player2Location = windowDimensions.mult(0.4f);
-//        String player2BasePath = "EX_5/src/pepse/assets/player2-frames\\player2-frame";
-//        String player2Suffix = ".png";
-//        AvatarKeymap player2Keymap = new AvatarKeymap(KeyEvent.VK_D, KeyEvent.VK_A,
-//                KeyEvent.VK_W, KeyEvent.VK_E);
-//        player2 = Avatar.create(gameObjects(), Layer.DEFAULT, player2Location, inputListener,
-//                imageReader, player2BasePath, player2Suffix, player2Keymap);
-//
-//        this.setCamera(new Camera(Vector2.ZERO, windowDimensions, windowDimensions));
-////        cameraManager
-//        CameraManager camManager = new CameraManager(this.camera(), player1, player2, inputListener,
-//                KeyEvent.VK_F);
-//
-//        this.gameObjects().addGameObject(camManager);
+        this.screenChunkManager = new ScreenChunkManager(gameObjects(), windowDimensions, tree, terrain,
+                avatarLocation.x());
+
+//        player2 creation
+        Vector2 player2Location = windowDimensions.mult(PLAYER_2_LOCATION);
+        AvatarKeymap player2Keymap = new AvatarKeymap(KeyEvent.VK_D, KeyEvent.VK_A,
+                KeyEvent.VK_W, KeyEvent.VK_E);
+        player2 = Avatar.createAvatar(gameObjects(), Layer.DEFAULT, player2Location, inputListener,
+                imageReader, PLAYER_2_PATH, PLAYERS_SUFFIX, player2Keymap);
+
+        this.setCamera(new Camera(Vector2.ZERO, windowDimensions, windowDimensions));
+
+//        cameraManager
+        CameraManager camManager = new CameraManager(this.camera(), player1, player2, inputListener,
+                KeyEvent.VK_F);
+
+        this.gameObjects().addGameObject(camManager);
     }
 
+    /**
+     * main function.
+     * @param args .
+     */
     public static void main(String[] args) {
         new PepseGameManager().run();
     }
 
+    /**
+     * updating the world chunks.
+     * @param deltaTime .
+     */
     @Override
     public void update(float deltaTime) {
-
         super.update(deltaTime);
         if (player1 != null) {
             float player1XPosition = player1.getCenter().x();
-            ScreenChunkManager.updateChunks(player1XPosition);
+            screenChunkManager.updateChunks(player1XPosition, player2.getCenter().x());
         }
-//        if (player2 != null){
-//            float player2XPosition = player2.getCenter().x();
-//            ScreenChunkManager.updateChunks(player2XPosition);
-//        }
     }
 }
