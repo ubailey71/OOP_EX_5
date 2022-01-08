@@ -8,7 +8,6 @@ import danogl.gui.rendering.Renderable;
 import danogl.util.Vector2;
 import pepse.util.ColorSupplier;
 import pepse.world.Block;
-import pepse.util.ScreenChunkManager;
 
 
 import java.awt.*;
@@ -75,7 +74,6 @@ public class Tree {
                 continue;
             }
             int groundHeightInBlocks = (int) (groundHeightAt.apply(curX) / blockSize);
-//            int groundHeightInBlocks = (int) Math.floor(groundHeightAt.apply(curX) / blockSize);
             createSingleTree(gameObjects, layer, groundHeightInBlocks, curX, random);
             isPrevPlaced = true;
             curX += blockSize;
@@ -83,7 +81,15 @@ public class Tree {
         gameObjects.layers().shouldLayersCollide(layer + 1, Layer.DEFAULT, true);
         gameObjects.layers().shouldLayersCollide(layer + 2, Layer.STATIC_OBJECTS, true);
     }
-    public void createInRange(int minX, int maxX, List<GameObject> addedTrees) {
+
+    /**
+     * This method creates trees in a given range of x-values.
+     *
+     * @param minX - The lower bound of the given range (will be rounded to a multiple of Block.SIZE).
+     * @param maxX - The upper bound of the given range (will be rounded to a multiple of Block.SIZE).
+     * @param addedTrees - cur chunk trees.
+     */
+    public void createTreesInRange(int minX, int maxX, List<GameObject> addedTrees) {
         float blockSize = Block.SIZE;
         float curX = (float) (Math.ceil(Math.abs(minX) / blockSize) * (int) Math.signum(minX) * blockSize);
         boolean isPrevPlaced = false;
@@ -139,6 +145,9 @@ public class Tree {
         createLeaves(treeTopLeftCorner, gameObjects, random, layer + 2, addedTrees);
     }
 
+    /*
+    create a single tree.
+     */
     private static void createSingleTree(GameObjectCollection gameObjects, int layer,
                                          int groundHeightInBlocks, float curX, Random random) {
         if (groundHeightInBlocks - TREE_MIN_HEIGHT <= 0) {

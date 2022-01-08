@@ -1,0 +1,47 @@
+erez.yakoby
+ubailey71
+
+
+changes between uml:
+when we wrote the first uml, we didn't predict that we would need some kind of helper classes.
+we added the following classes and packages:
+1. assets package - for the avatars images.
+2. util.CameraManager class - for making the camera keep both avatars in frame.
+3. util.ScreenChunk class - for the infinite world chunks.
+4. util.ScreenChunkManager class - for managing the infinite world chunks.
+5. world.avatarProperties.AvatarAnimations class - for both avatars images.
+6. world.avatarProperties.AvatarKeymap class - for both avatars control keys.
+
+
+infinite world:
+The idea is to create the world as individual chunks and to remove or add chunks according to avatars
+location.
+we created 2 additional classes: ScreenChunk, ScreenChunkManager.
+An instance of ScreenChunk holds the min and max coordinate of the screen and holds all of the terrain, trees
+and leaves objects that are located within those coordinates.
+The PepseGameManager overrides the update method and send the location of the avatars to the
+ScreenChunkManager. The manager removes or adds the chunks according to the avatars locations.
+
+
+implementing trees:
+the trees package contains two classes: Tree and Leaf.
+the tree class is used to create all the trees in a required range (including their leaves).
+the Leaf class is extending the Block class because each leaf is virtually a Block object which has a
+different color and transitions.
+we implemented it that way because in our opinion there is no need for a class only for the tree bases because
+the only thing that is moving or changing are the leaves.
+
+
+dilemmas and design decisions:
+mainly the trees package draw our attention and got us wondering about its implementation but finally we
+decided to implement it as mentioned above.
+
+
+Bonus implementation:
+we created a double player game so that the second avatar can be controlled by the A,D,W,E keys.
+the camera is programed to keep both avatars in the frame so it zooms out when they are moving away from each
+other.
+the implementation was real tricky because keeping both avatars in the frame, requires doing more updates of
+world chunks and keeping all the world chunks which are located between the players, in the current game
+objects. that means that the game needs to render way more objects per frame so that we needed to make the
+game real efficient.

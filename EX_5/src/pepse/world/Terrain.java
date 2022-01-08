@@ -7,7 +7,6 @@ import danogl.gui.rendering.Renderable;
 import danogl.util.Vector2;
 import pepse.util.ColorSupplier;
 import pepse.util.PerlinNoise;
-import pepse.util.ScreenChunkManager;
 
 import java.awt.*;
 import java.util.List;
@@ -84,7 +83,14 @@ public class Terrain {
         }
     }
 
-    public void createInRange(int minX, int maxX, List<GameObject> addedBlocks) {
+    /**
+     * This method creates terrain in a given range of x-values.
+     *
+     * @param minX - The lower bound of the given range (will be rounded to a multiple of Block.SIZE).
+     * @param maxX - The upper bound of the given range (will be rounded to a multiple of Block.SIZE).
+     * @param addedBlocks - the cur chunk blocks.
+     */
+    public void createTerrainInRange(int minX, int maxX, List<GameObject> addedBlocks) {
         float blockSize = Block.SIZE;
 
         // X position of the first and last blocks
@@ -123,6 +129,9 @@ public class Terrain {
         }
     }
 
+    /*
+    creates a single block of terrain.
+    */
     private static void createSingleBlock(GameObjectCollection gameObj, Vector2 topLeftCorner,
                                           int blockRowNum, int layer, List<GameObject> addedBlocks) {
 

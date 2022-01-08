@@ -93,7 +93,7 @@ public class Avatar extends GameObject {
         return avatar;
     }
 
-    public static Avatar create(GameObjectCollection gameObjects,
+    public static Avatar createAvatar(GameObjectCollection gameObjects,
                                 int layer,
                                 Vector2 topLeftCorner,
                                 UserInputListener inputListener,

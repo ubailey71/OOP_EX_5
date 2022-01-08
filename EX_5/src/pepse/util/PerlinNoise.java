@@ -1,20 +1,16 @@
 package pepse.util;
 
-import java.util.Random;
-
+/**
+ * imported class which implements a perlin noise function.
+ */
 public class PerlinNoise {
-    private double seed;
+    private final double seed;
     private long default_size;
     private int[] p;
     private int[] permutation;
 
     public PerlinNoise(double seed) {
         this.seed = seed;
-        init();
-    }
-
-    public PerlinNoise() {
-        this.seed = new Random().nextGaussian() * 255;
         init();
     }
 
@@ -48,52 +44,6 @@ public class PerlinNoise {
             p[256 + i] = p[i] = permutation[i];
         }
 
-    }
-
-    public void setSeed(double seed) {
-        this.seed = seed;
-    }
-
-    public double getSeed() {
-        return this.seed;
-    }
-
-    public double noise(double x, double y, double z, int size) {
-        double value = 0.0;
-        double initialSize = size;
-
-        while (size >= 1) {
-            value += smoothNoise((x / size), (y / size), (z / size)) * size;
-            size /= 2.0;
-        }
-
-        return value / initialSize;
-    }
-
-    public double noise(double x, double y, double z) {
-        double value = 0.0;
-        double size = default_size;
-        double initialSize = size;
-
-        while (size >= 1) {
-            value += smoothNoise((x / size), (y / size), (z / size)) * size;
-            size /= 2.0;
-        }
-
-        return value / initialSize;
-    }
-
-    public double noise(double x, double y) {
-        double value = 0.0;
-        double size = default_size;
-        double initialSize = size;
-
-        while (size >= 1) {
-            value += smoothNoise((x / size), (y / size), (0f / size)) * size;
-            size /= 2.0;
-        }
-
-        return value / initialSize;
     }
 
     public double noise(double x) {

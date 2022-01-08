@@ -1,5 +1,6 @@
 package pepse.world.avatarProperties;
 
+
 public class AvatarKeymap {
 
     public int moveRight;

@@ -4,7 +4,6 @@ import danogl.GameObject;
 import danogl.collisions.GameObjectCollection;
 import danogl.collisions.Layer;
 import pepse.PepseGameManager;
-import pepse.world.Block;
 import pepse.world.Terrain;
 import pepse.world.trees.Tree;
 
@@ -14,8 +13,8 @@ import java.util.*;
  * represents a single chunk of ground and holds all the object that are located between its borders.
  */
 public class ScreenChunk {
-    private List<GameObject> groundInChunk = new ArrayList<>();
-    private List<GameObject> treesInChunk = new ArrayList<>();
+    private final List<GameObject> groundInChunk = new ArrayList<>();
+    private final List<GameObject> treesInChunk = new ArrayList<>();
 
     /**
      * Constructor
@@ -24,8 +23,8 @@ public class ScreenChunk {
      * @param maxX right border
      */
     public ScreenChunk(int minX, int maxX, Terrain terrain, Tree tree) {
-        terrain.createInRange(minX, maxX, groundInChunk);
-        tree.createInRange(minX, maxX, treesInChunk);
+        terrain.createTerrainInRange(minX, maxX, groundInChunk);
+        tree.createTreesInRange(minX, maxX, treesInChunk);
     }
     /**
      * removes all the game object that are located in this chunk.
@@ -44,6 +43,5 @@ public class ScreenChunk {
                 if (!gameObjects.removeGameObject(block, PepseGameManager.TREES_LAYER + 1))
                     gameObjects.removeGameObject(block, PepseGameManager.TREES_LAYER + 2);
         }
-
     }
 }

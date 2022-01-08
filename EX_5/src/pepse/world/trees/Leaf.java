@@ -8,7 +8,6 @@ import danogl.components.Transition;
 import danogl.gui.rendering.Renderable;
 import danogl.util.Vector2;
 import pepse.world.Block;
-import pepse.util.ScreenChunkManager;
 
 import java.util.List;
 import java.util.Random;
@@ -91,6 +90,14 @@ public class Leaf extends Block {
                     this.renderer().fadeOut(FADEOUT_TIME, this::reviveLeaf);
                 });
     }
+
+    /**
+     * creates a single leaf and starts its life cycle.
+     *
+     * @param gameObjects The collection of all participating game objects.
+     * @param tag         leaf tag
+     * @param layer       leaf layer
+     */
     public void createLeaf(GameObjectCollection gameObjects, String tag, int layer,
                            List<GameObject> addedLeaves) {
         this.setTag(tag);

@@ -12,7 +12,6 @@ import danogl.util.Vector2;
 import pepse.util.CameraManager;
 import pepse.util.ScreenChunkManager;
 import pepse.world.Avatar;
-import pepse.world.Block;
 import pepse.world.Sky;
 import pepse.world.Terrain;
 import pepse.world.avatarProperties.AvatarKeymap;
@@ -24,11 +23,17 @@ import pepse.world.trees.Tree;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 
+/**
+ * the pepse game manager.
+ */
 public class PepseGameManager extends GameManager {
 
 
     private static final Color HALO_COLOR = new Color(255, 255, 0, 20);
-    private static final float AVATAR_POSITION_FACTOR = 0.2f;
+    private static final String PLAYER_1_PATH = "EX_5/src/pepse/assets/player1-frames\\knight-frame";
+    private static final String PLAYER_2_PATH = "EX_5/src/pepse/assets/player2-frames\\player2-frame";
+    private static final float PLAYER_2_LOCATION = 0.4f;
+    private static final String PLAYERS_SUFFIX = ".png";
     private static final float CYCLE_LENGTH = 60;
     private static final int SEED = 3;
 
@@ -79,24 +84,20 @@ public class PepseGameManager extends GameManager {
         //player1 creation
         Vector2 avatarLocation = new Vector2(windowDimensions.x() / 2,
                 terrain.groundHeightAt(windowDimensions.x()) / 2);
-        String player1BasePath = "EX_5/src/pepse/assets/player1-frames\\knight-frame";
-        String player1suffix = ".png";
         AvatarKeymap player1Keymap = new AvatarKeymap(KeyEvent.VK_RIGHT, KeyEvent.VK_LEFT,
                 KeyEvent.VK_SPACE, KeyEvent.VK_SHIFT);
-        player1 = Avatar.create(gameObjects(), AVATAR_LAYER, avatarLocation, inputListener,
-                imageReader, player1BasePath, player1suffix, player1Keymap);
+        player1 = Avatar.createAvatar(gameObjects(), AVATAR_LAYER, avatarLocation, inputListener,
+                imageReader, PLAYER_1_PATH, PLAYERS_SUFFIX, player1Keymap);
         setCamera(new Camera(player1, Vector2.ZERO, windowDimensions, windowDimensions));
         this.screenChunkManager = new ScreenChunkManager(gameObjects(), windowDimensions, tree, terrain,
                 avatarLocation.x());
 
 //        player2 creation
-        Vector2 player2Location = windowDimensions.mult(0.4f);
-        String player2BasePath = "EX_5/src/pepse/assets/player2-frames\\player2-frame";
-        String player2Suffix = ".png";
+        Vector2 player2Location = windowDimensions.mult(PLAYER_2_LOCATION);
         AvatarKeymap player2Keymap = new AvatarKeymap(KeyEvent.VK_D, KeyEvent.VK_A,
                 KeyEvent.VK_W, KeyEvent.VK_E);
-        player2 = Avatar.create(gameObjects(), Layer.DEFAULT, player2Location, inputListener,
-                imageReader, player2BasePath, player2Suffix, player2Keymap);
+        player2 = Avatar.createAvatar(gameObjects(), Layer.DEFAULT, player2Location, inputListener,
+                imageReader, PLAYER_2_PATH, PLAYERS_SUFFIX, player2Keymap);
 
         this.setCamera(new Camera(Vector2.ZERO, windowDimensions, windowDimensions));
 
@@ -107,10 +108,18 @@ public class PepseGameManager extends GameManager {
         this.gameObjects().addGameObject(camManager);
     }
 
+    /**
+     * main function.
+     * @param args .
+     */
     public static void main(String[] args) {
         new PepseGameManager().run();
     }
 
+    /**
+     * updating the world chunks.
+     * @param deltaTime .
+     */
     @Override
     public void update(float deltaTime) {
         super.update(deltaTime);
