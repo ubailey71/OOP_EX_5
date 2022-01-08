@@ -8,22 +8,31 @@ import danogl.components.Transition;
 import danogl.gui.rendering.Renderable;
 import danogl.util.Vector2;
 import pepse.world.Block;
+import pepse.util.ScreenChunkManager;
 
 import java.util.Random;
 
+/**
+ * represent a single leaf.
+ */
 public class Leaf extends Block {
-    private static final float LEAF_WIDTH_WIDEN_FACTOR = 1.2f;
     private static final float LEAF_WIDTH_NARROW_FACTOR = 0.9f;
+    private static final float LEAF_WIDTH_WIDEN_FACTOR = 1.2f;
     private static final int LEAF_WIDTH_TRANSITION_TIME = 3;
 
     private static final float LEAF_INITIAL_ANGLE = -10f;
     private static final float LEAF_FINAL_ANGLE = 10f;
     private static final int ANGLE_TRANSITION_TIME = 2;
 
-    private static final int FALLING_SPEED = 70;
-    private static final int FADEOUT_TIME = 10;
-    private static final int LIFE_CYCLE_LENGTH_BOUND = 250;
-    private static final int DEATH_LENGTH_BOUND = 20;
+    private static final int LIFE_CYCLE_LENGTH_BOUND = 300;
+    private static final int DEATH_LENGTH_BOUND = 10;
+    private static final int FALLING_SPEED = 90;
+    private static final int FADEOUT_TIME = 8;
+    private static final int FADE_IN_TIME = 1;
+    private static final int LEAF_MASS = 1;
+
+    private static final int LEAF_DELAY_BOUND = 200;
+    private static final float LEAF_DELAY_DIVIDE_FACTOR = 100;
 
     private static final float HORIZONTAL_MOVEMENT_INIT_VELOCITY = -30f;
     private static final float HORIZONTAL_MOVEMENT_FINAL_VELOCITY = 30f;
@@ -34,7 +43,7 @@ public class Leaf extends Block {
     Transition<Float> angleTransition;
 
     private final Random random;
-    private int deathTime;
+    private int deathTime = 0;
     Vector2 originalLocation;
 
 
@@ -44,27 +53,37 @@ public class Leaf extends Block {
      * @param topLeftCorner Position of the object, in window coordinates (pixels).
      *                      Note that (0,0) is the top-left corner of the window.
      * @param renderable    The renderable representing the object. Can be null, in which case
+     * @param random        random object
      */
     public Leaf(Vector2 topLeftCorner, Renderable renderable, Random random) {
         super(topLeftCorner, renderable);
         this.random = random;
         originalLocation = topLeftCorner;
-        physics().setMass(1);
-        deathTime = 2;
+        physics().setMass(LEAF_MASS);
+
     }
 
 
+    /**
+     * creates a single leaf and starts its life cycle.
+     *
+     * @param gameObjects The collection of all participating game objects.
+     * @param tag         leaf tag
+     * @param layer       leaf layer
+     */
     public void createLeaf(GameObjectCollection gameObjects, String tag, int layer) {
         this.setTag(tag);
         gameObjects.addGameObject(this, layer);
+        ScreenChunkManager.addBlock(this, layer);
 
         createRegularLeafMovement(this);
         horizontalTransition = createHorizontalTransition(this);
         this.removeComponent(horizontalTransition);
 
-        ScheduledTask leafLifeCycle = new ScheduledTask(
+        new ScheduledTask(
                 this,
-                random.nextInt(LIFE_CYCLE_LENGTH_BOUND) + deathTime + FADEOUT_TIME,
+                random.nextInt(LIFE_CYCLE_LENGTH_BOUND) +
+                        (deathTime = random.nextInt(DEATH_LENGTH_BOUND)) + FADEOUT_TIME + 5,
                 true,
                 () -> {
                     this.transform().setVelocityY(FALLING_SPEED);
@@ -73,8 +92,11 @@ public class Leaf extends Block {
                 });
     }
 
+    /*
+    creates the leaf changing angle and width transitions with a random delay.
+    */
     private void createRegularLeafMovement(Leaf leaf) {
-        float delayTime = (random.nextInt(200)) / (float) 100;
+        float delayTime = (random.nextInt(LEAF_DELAY_BOUND)) / LEAF_DELAY_DIVIDE_FACTOR;
         new ScheduledTask(
                 leaf,
                 delayTime,
@@ -85,6 +107,9 @@ public class Leaf extends Block {
                 });
     }
 
+    /*
+    creates the leaf changing angle transition.
+    */
     private static Transition<Float> createAngleTransition(Leaf leaf) {
         return new Transition<>(
                 leaf,
@@ -97,6 +122,9 @@ public class Leaf extends Block {
                 null);
     }
 
+    /*
+    creates the leaf changing width transition.
+     */
     private static Transition<Vector2> createWidthChangeTransition(Leaf leaf) {
         Vector2 leafInitDim = leaf.getDimensions();
 
@@ -111,6 +139,9 @@ public class Leaf extends Block {
                 null);
     }
 
+    /*
+    creates the leaf falling horizontal movement transition.
+    */
     private static Transition<Float> createHorizontalTransition(Leaf leaf) {
         return new Transition<>(
                 leaf,
@@ -124,9 +155,11 @@ public class Leaf extends Block {
         );
     }
 
+    /*
+    creates a delayed task which places the leaf back in place and restarts its wind movement.
+    */
     private void reviveLeaf() {
-        deathTime = random.nextInt(DEATH_LENGTH_BOUND);
-        ScheduledTask revive = new ScheduledTask(
+        new ScheduledTask(
                 this,
                 deathTime,
                 false,
@@ -134,20 +167,26 @@ public class Leaf extends Block {
                     this.setTopLeftCorner(originalLocation);
                     this.addComponent(angleTransition);
                     this.addComponent(widthChangeTransition);
-                    this.renderer().fadeIn(1);
+                    this.removeComponent(horizontalTransition);
+                    this.transform().setVelocity(Vector2.ZERO);
+                    this.renderer().fadeIn(FADE_IN_TIME);
                 }
         );
     }
 
-        @Override
-    public void onCollisionEnter(GameObject other, Collision collision) {
-        super.onCollisionEnter(other, collision);
+
+    /**
+     * stops transitions on collision.
+     *
+     * @param other     .
+     * @param collision .
+     */
+    @Override
+    public void onCollisionStay(GameObject other, Collision collision) {
+        super.onCollisionStay(other, collision);
         this.removeComponent(horizontalTransition);
         this.removeComponent(angleTransition);
         this.removeComponent(widthChangeTransition);
-        this.transform().setVelocityY(0);
-        this.transform().setVelocityX(0);
-
-
+        this.transform().setVelocity(Vector2.ZERO);
     }
 }
