@@ -11,8 +11,8 @@ public class AvatarAnimations {
     public Renderable fly;
 
 
-    public AvatarAnimations (Renderable stand, Renderable walk, Renderable acceleration_up, Renderable fly,
-                             Renderable acceleration_down){
+    public AvatarAnimations(Renderable stand, Renderable walk, Renderable acceleration_up, Renderable fly,
+                            Renderable acceleration_down) {
         this.stand = stand;
         this.walk = walk;
         this.acceleration_up = acceleration_up;

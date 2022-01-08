@@ -57,10 +57,10 @@ public class Avatar extends GameObject {
         return frames;
     }
 
-    private static AnimationRenderable getAnimation (String basePath, String suffix, int start, int end,
-                                                     ImageReader imageReader){
+    private static AnimationRenderable getAnimation(String basePath, String suffix, int start, int end,
+                                                    ImageReader imageReader) {
         return new AnimationRenderable(
-                framePaths(basePath,suffix,start,end),
+                framePaths(basePath, suffix, start, end),
                 imageReader,
                 true,
                 WAIT_TIME);
@@ -75,15 +75,15 @@ public class Avatar extends GameObject {
         String suffix = ".png";
 
         Renderable standAnimation = getAnimation(basePath, suffix, 1, 33, imageReader);
-        Renderable walkAnimation = getAnimation(basePath, suffix,34, 41, imageReader);
-        Renderable acceleration_up = getAnimation(basePath, suffix,42, 86, imageReader);
-        Renderable fly = getAnimation(basePath, suffix,87, 163, imageReader);
-        Renderable acceleration_down = getAnimation(basePath, suffix,164, 184, imageReader);
+        Renderable walkAnimation = getAnimation(basePath, suffix, 34, 41, imageReader);
+        Renderable acceleration_up = getAnimation(basePath, suffix, 42, 86, imageReader);
+        Renderable fly = getAnimation(basePath, suffix, 87, 163, imageReader);
+        Renderable acceleration_down = getAnimation(basePath, suffix, 164, 184, imageReader);
 
         AvatarAnimations animations =
-                new AvatarAnimations(standAnimation, walkAnimation, acceleration_up,fly, acceleration_down);
+                new AvatarAnimations(standAnimation, walkAnimation, acceleration_up, fly, acceleration_down);
 
-        AvatarKeymap keymap = new AvatarKeymap(KeyEvent.VK_RIGHT, KeyEvent.VK_LEFT,KeyEvent.VK_SPACE,
+        AvatarKeymap keymap = new AvatarKeymap(KeyEvent.VK_RIGHT, KeyEvent.VK_LEFT, KeyEvent.VK_SPACE,
                 KeyEvent.VK_SHIFT);
 
         Avatar avatar = new Avatar(topLeftCorner, AVATAR_SCALE, inputListener, animations, keymap);
@@ -100,16 +100,15 @@ public class Avatar extends GameObject {
                                 ImageReader imageReader,
                                 String basePath,
                                 String suffix,
-                                AvatarKeymap keymap)
-    {
+                                AvatarKeymap keymap) {
         Renderable standAnimation = getAnimation(basePath, suffix, 1, 33, imageReader);
-        Renderable walkAnimation = getAnimation(basePath, suffix,34, 41, imageReader);
-        Renderable acceleration_up = getAnimation(basePath, suffix,42, 86, imageReader);
-        Renderable fly = getAnimation(basePath, suffix,87, 163, imageReader);
-        Renderable acceleration_down = getAnimation(basePath, suffix,164, 184, imageReader);
+        Renderable walkAnimation = getAnimation(basePath, suffix, 34, 41, imageReader);
+        Renderable acceleration_up = getAnimation(basePath, suffix, 42, 86, imageReader);
+        Renderable fly = getAnimation(basePath, suffix, 87, 163, imageReader);
+        Renderable acceleration_down = getAnimation(basePath, suffix, 164, 184, imageReader);
 
         AvatarAnimations animations =
-                new AvatarAnimations(standAnimation, walkAnimation, acceleration_up,fly, acceleration_down);
+                new AvatarAnimations(standAnimation, walkAnimation, acceleration_up, fly, acceleration_down);
 
         Avatar avatar = new Avatar(topLeftCorner, AVATAR_SCALE, inputListener, animations, keymap);
         avatar.transform().setAccelerationY(GRAVITY_SPEED);
@@ -119,14 +118,15 @@ public class Avatar extends GameObject {
     }
 
 
-    private void handleStanding(boolean isOnGround){
+    private void handleStanding(boolean isOnGround) {
         if (!inputListener.isKeyPressed(KeyEvent.KEY_PRESSED)) {
             if (isOnGround)
                 this.renderer().setRenderable(this.animations.stand);
             this.transform().setVelocityX(0);
         }
     }
-    private void handleHorizontalMovement(boolean isOnGround){
+
+    private void handleHorizontalMovement(boolean isOnGround) {
         if (inputListener.isKeyPressed(keymap.moveRight)) {
             if (isOnGround)
                 this.renderer().setRenderable(this.animations.walk);
@@ -141,7 +141,8 @@ public class Avatar extends GameObject {
             isLookingLeft = true;
         }
     }
-    private void handleVerticalMovement(boolean isOnGround){
+
+    private void handleVerticalMovement(boolean isOnGround) {
         boolean isFlying = false;
         if (inputListener.isKeyPressed(keymap.jump)) {
             if (isOnGround) {
@@ -150,17 +151,19 @@ public class Avatar extends GameObject {
             }
         }
 
-        if (inputListener.isKeyPressed(keymap.jump) && inputListener.isKeyPressed(keymap.fly)){
+        if (inputListener.isKeyPressed(keymap.jump) && inputListener.isKeyPressed(keymap.fly)) {
             isFlying = energyLevel > 0;
         }
 
-        if (isFlying){
+        if (isFlying) {
             energyLevel -= ENERGY_STEP;
             transform().setVelocityY(VERTICAL_FLIGHT_SPEED);
         }
         if (this.transform().getVelocity().y() < 0) {
-            if (isFlying) renderer().setRenderable(animations.fly);
-            else renderer().setRenderable(animations.acceleration_up);
+            if (isFlying)
+                renderer().setRenderable(animations.fly);
+            else
+                renderer().setRenderable(animations.acceleration_up);
             return;
         }
 
@@ -173,7 +176,7 @@ public class Avatar extends GameObject {
         super.update(deltaTime);
         boolean isOnGround = this.transform().getVelocity().y() == 0;
         if (isOnGround) {
-            this.energyLevel = Math.min(this.energyLevel + ENERGY_STEP,INITIAL_ENERGY_LEVEL);
+            this.energyLevel = Math.min(this.energyLevel + ENERGY_STEP, INITIAL_ENERGY_LEVEL);
         }
         handleStanding(isOnGround);
         handleHorizontalMovement(isOnGround);

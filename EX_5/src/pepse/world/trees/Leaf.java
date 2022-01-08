@@ -10,6 +10,7 @@ import danogl.util.Vector2;
 import pepse.world.Block;
 import pepse.util.ScreenChunkManager;
 
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -74,7 +75,28 @@ public class Leaf extends Block {
     public void createLeaf(GameObjectCollection gameObjects, String tag, int layer) {
         this.setTag(tag);
         gameObjects.addGameObject(this, layer);
-        ScreenChunkManager.addBlock(this, layer);
+
+        createRegularLeafMovement(this);
+        horizontalTransition = createHorizontalTransition(this);
+        this.removeComponent(horizontalTransition);
+
+        new ScheduledTask(
+                this,
+                random.nextInt(LIFE_CYCLE_LENGTH_BOUND) +
+                        (deathTime = random.nextInt(DEATH_LENGTH_BOUND)) + FADEOUT_TIME + 5,
+                true,
+                () -> {
+                    this.transform().setVelocityY(FALLING_SPEED);
+                    this.addComponent(horizontalTransition);
+                    this.renderer().fadeOut(FADEOUT_TIME, this::reviveLeaf);
+                });
+    }
+    public void createLeaf(GameObjectCollection gameObjects, String tag, int layer,
+                           List<GameObject> addedLeaves) {
+        this.setTag(tag);
+        gameObjects.addGameObject(this, layer);
+        addedLeaves.add(this);
+//        ScreenChunkManager.addBlock(this, layer);
 
         createRegularLeafMovement(this);
         horizontalTransition = createHorizontalTransition(this);
