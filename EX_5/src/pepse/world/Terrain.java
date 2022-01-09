@@ -7,7 +7,6 @@ import danogl.gui.rendering.Renderable;
 import danogl.util.Vector2;
 import pepse.util.ColorSupplier;
 import pepse.util.PerlinNoise;
-import pepse.util.ScreenChunkManager;
 
 import java.awt.*;
 import java.util.List;

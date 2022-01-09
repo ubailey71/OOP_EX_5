@@ -8,7 +8,7 @@ import danogl.util.Vector2;
 /**
  * Represents a single block (larger objects can be created from blocks).
  */
-public class Block extends danogl.GameObject{
+public class Block extends danogl.GameObject {
     public static final int SIZE = 30; // Size of a single block.
 
     /**

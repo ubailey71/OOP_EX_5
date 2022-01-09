@@ -4,11 +4,11 @@ import danogl.GameObject;
 import danogl.collisions.GameObjectCollection;
 import danogl.collisions.Layer;
 import pepse.PepseGameManager;
-import pepse.world.Block;
 import pepse.world.Terrain;
 import pepse.world.trees.Tree;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * represents a single chunk of ground and holds all the object that are located between its borders.

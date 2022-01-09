@@ -1,16 +1,12 @@
 package pepse.util;
 
 import danogl.collisions.GameObjectCollection;
-import danogl.gui.rendering.Camera;
 import danogl.util.Vector2;
-import pepse.world.Block;
 import pepse.world.Terrain;
 import pepse.world.trees.Tree;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
-import java.util.function.BiConsumer;
 
 
 /**
