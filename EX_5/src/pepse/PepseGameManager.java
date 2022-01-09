@@ -12,7 +12,6 @@ import danogl.util.Vector2;
 import pepse.util.CameraManager;
 import pepse.util.ScreenChunkManager;
 import pepse.world.Avatar;
-import pepse.world.Block;
 import pepse.world.Sky;
 import pepse.world.Terrain;
 import pepse.world.avatarProperties.AvatarKeymap;
@@ -76,6 +75,7 @@ public class PepseGameManager extends GameManager {
 
 
         //avatar creation
+
         //player1 creation
         Vector2 avatarLocation = new Vector2(windowDimensions.x() / 2,
                 terrain.groundHeightAt(windowDimensions.x()) / 2);

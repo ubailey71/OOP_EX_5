@@ -6,9 +6,12 @@ import danogl.gui.rendering.Camera;
 import danogl.util.Vector2;
 import pepse.world.Avatar;
 
+/**
+ * a class to manage the camera in a 2 player system
+ */
 public class CameraManager extends GameObject {
 
-    private static int EXTRA_SPACE = 200;
+    private static final int EXTRA_SPACE = 200;
 
     private final Vector2 originalCamDimensions;
     private final Camera cam;
@@ -18,6 +21,15 @@ public class CameraManager extends GameObject {
     private final int changeTrackModeKey;
     private boolean trackBothPlayers = true;
 
+    /**
+     * constructor
+     * @param cam the camera
+     * @param playerA the avatar of the first player, this player will be followed in track single player
+     *                mode
+     * @param playerB the avatar of the second player
+     * @param inputListener inputListener of the game
+     * @param changeTrackModeKey the key that changes the tracking mode
+     */
     public CameraManager(
                          Camera cam,
                          Avatar playerA,
@@ -65,6 +77,10 @@ public class CameraManager extends GameObject {
         cam.setToFollow(playerA,Vector2.ZERO);
     }
 
+    /**
+     * updates the camera in coordination with avatars
+     * @param deltaTime time since last call
+     */
     @Override public void update(float deltaTime) {
         super.update(deltaTime);
         if(inputListener.wasKeyReleasedThisFrame(changeTrackModeKey)) trackBothPlayers = !trackBothPlayers;

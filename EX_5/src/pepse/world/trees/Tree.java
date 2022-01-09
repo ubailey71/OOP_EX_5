@@ -8,14 +8,12 @@ import danogl.gui.rendering.Renderable;
 import danogl.util.Vector2;
 import pepse.util.ColorSupplier;
 import pepse.world.Block;
-import pepse.util.ScreenChunkManager;
-
 
 import java.awt.*;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.function.Function;
-import java.util.Objects;
 
 /**
  * Responsible for the creation and management of trees.
@@ -83,6 +81,7 @@ public class Tree {
         gameObjects.layers().shouldLayersCollide(layer + 1, Layer.DEFAULT, true);
         gameObjects.layers().shouldLayersCollide(layer + 2, Layer.STATIC_OBJECTS, true);
     }
+
     public void createInRange(int minX, int maxX, List<GameObject> addedTrees) {
         float blockSize = Block.SIZE;
         float curX = (float) (Math.ceil(Math.abs(minX) / blockSize) * (int) Math.signum(minX) * blockSize);
@@ -125,11 +124,10 @@ public class Tree {
                     new RectangleRenderable(ColorSupplier.approximateColor(BASIC_TREE_COLOR));
             Block block = new Block(topLeftCorner, blockRender);
             block.setTag(TREE_TAG);
-            if (blockIdx == treeHeight - 1){
+            if (blockIdx == treeHeight - 1) {
                 gameObjects.addGameObject(block, layer + 1);
                 addedTrees.add(block);
-            }
-            else{
+            } else {
                 gameObjects.addGameObject(block, layer);
                 addedTrees.add(block);
             }
@@ -153,10 +151,9 @@ public class Tree {
                     new RectangleRenderable(ColorSupplier.approximateColor(BASIC_TREE_COLOR));
             Block block = new Block(topLeftCorner, blockRender);
             block.setTag(TREE_TAG);
-            if (blockIdx == treeHeight - 1){
+            if (blockIdx == treeHeight - 1) {
                 gameObjects.addGameObject(block, layer + 1);
-            }
-            else{
+            } else {
                 gameObjects.addGameObject(block, layer);
             }
         }
@@ -198,8 +195,9 @@ public class Tree {
             }
         }
     }
+
     private static void createLeaves(Vector2 treeTopLeftCorner, GameObjectCollection gameObjects,
-                                     Random random, int layer, List<GameObject>addedLeaves) {
+                                     Random random, int layer, List<GameObject> addedLeaves) {
         Vector2 leafGridTLC = treeTopLeftCorner.add(Vector2.ONES.mult(-TREE_LEAF_OFFSET_SIZE * Block.SIZE));
 
         for (int rowIdx = 0; rowIdx < TREE_LEAF_OFFSET_SIZE * 2; rowIdx++) {

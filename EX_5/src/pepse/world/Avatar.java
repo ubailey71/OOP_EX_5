@@ -12,6 +12,9 @@ import pepse.world.avatarProperties.AvatarKeymap;
 
 import java.awt.event.KeyEvent;
 
+/**
+ * An avatar that can move around the world.
+ */
 public class Avatar extends GameObject {
 
     private static final Vector2 AVATAR_SCALE = new Vector2(50, 100);
@@ -29,18 +32,11 @@ public class Avatar extends GameObject {
     private UserInputListener inputListener;
     private AvatarKeymap keymap;
 
-    /**
-     * Construct a new GameObject instance.
-     *
-     * @param topLeftCorner Position of the object, in window coordinates (pixels).
-     *                      Note that (0,0) is the top-left corner of the window.
-     * @param dimensions    Width and height in window coordinates.
-     */
-    public Avatar(Vector2 topLeftCorner,
-                  Vector2 dimensions,
-                  UserInputListener inputListener,
-                  AvatarAnimations animations,
-                  AvatarKeymap keymap
+    private Avatar(Vector2 topLeftCorner,
+                   Vector2 dimensions,
+                   UserInputListener inputListener,
+                   AvatarAnimations animations,
+                   AvatarKeymap keymap
     ) {
         super(topLeftCorner, dimensions, animations.stand);
         this.inputListener = inputListener;
@@ -66,6 +62,17 @@ public class Avatar extends GameObject {
                 WAIT_TIME);
     }
 
+    /**
+     * This function creates an avatar that can travel the world and is followed by the camera. The can
+     * stand, walk, jump and fly, and never reaches the end of the world.
+     *
+     * @param gameObjects   - The collection of all participating game objects.
+     * @param layer         - The number of the layer to which the created avatar should be added.
+     * @param topLeftCorner - The location of the top-left corner of the created avatar.
+     * @param inputListener - Used for reading input from the user.
+     * @param imageReader   - Used for reading images from disk or from within a jar.
+     * @return A newly created Gameobject representing the avatar.
+     */
     public static Avatar create(GameObjectCollection gameObjects,
                                 int layer,
                                 Vector2 topLeftCorner,
@@ -93,6 +100,20 @@ public class Avatar extends GameObject {
         return avatar;
     }
 
+    /**
+     * This function creates an avatar that can travel the world and is followed by the camera. The can
+     * stand, walk, jump and fly, and never reaches the end of the world.
+     *
+     * @param gameObjects   - The collection of all participating game objects.
+     * @param layer         - The number of the layer to which the created avatar should be added.
+     * @param topLeftCorner - The location of the top-left corner of the created avatar.
+     * @param inputListener - Used for reading input from the user.
+     * @param imageReader   - Used for reading images from disk or from within a jar.
+     * @param basePath      - basic path (up to the frame number) to all the frames for the avatar animations
+     * @param suffix        - the animation frames suffix (i.e .png)
+     * @param keymap        - a AvatarKeyMap holding the mapping to all avatar actions
+     * @return A newly created Gameobject representing the avatar.
+     */
     public static Avatar create(GameObjectCollection gameObjects,
                                 int layer,
                                 Vector2 topLeftCorner,
